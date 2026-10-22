@@ -6,14 +6,25 @@ import { EXAMPLES } from "./examples";
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"editor" | "guide">("editor");
+  const [mobilePanel, setMobilePanel] = useState<"code" | "output">("code");
   const [code, setCode] = useState<string>("# check out the guide above!\n");
   const [logs, setLogs] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [waitingForInput, setWaitingForInput] = useState<boolean>(false);
   const [inputPrompt, setInputPrompt] = useState<string>("");
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   const workerRef = useRef<Worker | null>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const initWorker = () => {
     if (workerRef.current) {
@@ -30,6 +41,9 @@ export const App: React.FC = () => {
       } else if (type === "INPUT_REQUEST") {
         setWaitingForInput(true);
         setInputPrompt(prompt || "");
+        if (window.innerWidth < 768) {
+          setMobilePanel("output");
+        }
       } else if (type === "DONE") {
         setIsRunning(false);
         setWaitingForInput(false);
@@ -61,6 +75,11 @@ export const App: React.FC = () => {
     setIsRunning(true);
     setWaitingForInput(false);
     setInputPrompt("");
+
+    // Automatically flip to output on mobile so the user sees results/input prompt
+    if (isMobile) {
+      setMobilePanel("output");
+    }
 
     initWorker();
     workerRef.current?.postMessage({ type: "RUN", source: code });
@@ -94,6 +113,9 @@ export const App: React.FC = () => {
       setError(null);
       setWaitingForInput(false);
       setActiveTab("editor");
+      if (isMobile) {
+        setMobilePanel("code");
+      }
     }
   };
 
@@ -103,6 +125,9 @@ export const App: React.FC = () => {
     setError(null);
     setWaitingForInput(false);
     setActiveTab("editor");
+    if (isMobile) {
+      setMobilePanel("code");
+    }
   };
 
   return (
@@ -120,16 +145,19 @@ export const App: React.FC = () => {
       <header
         style={{
           display: "flex",
+          flexWrap: "wrap",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "6px 14px",
+          gap: "8px",
+          padding: isMobile ? "8px 10px" : "6px 14px",
           background: "#1e1e1e",
           borderBottom: "1px solid #2d2d2d",
           fontSize: "13px"
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontWeight: "bold", fontFamily: "monospace", color: "#ffffff" }}>
+        {/* Left: Brand + Navigation tabs */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontWeight: "bold", fontFamily: "monospace", color: "#ffffff", fontSize: "14px" }}>
             bolt
           </span>
 
@@ -140,9 +168,10 @@ export const App: React.FC = () => {
                 background: activeTab === "editor" ? "#2d2d2d" : "transparent",
                 color: activeTab === "editor" ? "#ffffff" : "#888888",
                 border: "none",
-                padding: "4px 10px",
+                padding: "6px 10px",
                 cursor: "pointer",
-                fontSize: "12px"
+                fontSize: "12px",
+                minHeight: "32px"
               }}
             >
               editor
@@ -153,9 +182,10 @@ export const App: React.FC = () => {
                 background: activeTab === "guide" ? "#2d2d2d" : "transparent",
                 color: activeTab === "guide" ? "#ffffff" : "#888888",
                 border: "none",
-                padding: "4px 10px",
+                padding: "6px 10px",
                 cursor: "pointer",
-                fontSize: "12px"
+                fontSize: "12px",
+                minHeight: "32px"
               }}
             >
               guide
@@ -163,7 +193,8 @@ export const App: React.FC = () => {
           </nav>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {/* Right: Controls */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           <select
             onChange={(e) => handleSelectExample(e.target.value)}
             defaultValue=""
@@ -171,10 +202,12 @@ export const App: React.FC = () => {
               background: "#141414",
               color: "#cccccc",
               border: "1px solid #333333",
-              padding: "3px 8px",
+              padding: "5px 8px",
               fontSize: "12px",
               cursor: "pointer",
-              outline: "none"
+              outline: "none",
+              maxWidth: isMobile ? "130px" : "180px",
+              minHeight: "32px"
             }}
           >
             <option value="" disabled>
@@ -194,9 +227,11 @@ export const App: React.FC = () => {
               background: isRunning && !waitingForInput ? "#254e28" : "#2e7d32",
               color: "#ffffff",
               border: "1px solid #1b5e20",
-              padding: "3px 12px",
+              padding: "5px 14px",
               fontSize: "12px",
-              cursor: isRunning && !waitingForInput ? "not-allowed" : "pointer"
+              fontWeight: 600,
+              cursor: isRunning && !waitingForInput ? "not-allowed" : "pointer",
+              minHeight: "32px"
             }}
           >
             Run
@@ -209,9 +244,10 @@ export const App: React.FC = () => {
               background: isRunning ? "#b71c1c" : "#2d2d2d",
               color: isRunning ? "#ffffff" : "#555555",
               border: "1px solid #333333",
-              padding: "3px 12px",
+              padding: "5px 12px",
               fontSize: "12px",
-              cursor: isRunning ? "pointer" : "not-allowed"
+              cursor: isRunning ? "pointer" : "not-allowed",
+              minHeight: "32px"
             }}
           >
             Stop
@@ -219,25 +255,93 @@ export const App: React.FC = () => {
         </div>
       </header>
 
+      {/* Mobile-only Code / Output sub-tab switcher */}
+      {activeTab === "editor" && isMobile && (
+        <div
+          style={{
+            display: "flex",
+            background: "#141414",
+            borderBottom: "1px solid #2d2d2d",
+            fontSize: "12px"
+          }}
+        >
+          <button
+            onClick={() => setMobilePanel("code")}
+            style={{
+              flex: 1,
+              padding: "8px 0",
+              background: mobilePanel === "code" ? "#222222" : "#141414",
+              color: mobilePanel === "code" ? "#ffffff" : "#777777",
+              border: "none",
+              borderBottom: mobilePanel === "code" ? "2px solid #38bdf8" : "2px solid transparent",
+              fontWeight: mobilePanel === "code" ? "bold" : "normal",
+              cursor: "pointer"
+            }}
+          >
+            Code
+          </button>
+          <button
+            onClick={() => setMobilePanel("output")}
+            style={{
+              flex: 1,
+              padding: "8px 0",
+              background: mobilePanel === "output" ? "#222222" : "#141414",
+              color: mobilePanel === "output" ? "#ffffff" : "#777777",
+              border: "none",
+              borderBottom: mobilePanel === "output" ? "2px solid #38bdf8" : "2px solid transparent",
+              fontWeight: mobilePanel === "output" ? "bold" : "normal",
+              cursor: "pointer"
+            }}
+          >
+            Output {logs.length > 0 ? `(${logs.length})` : ""} {waitingForInput ? "●" : ""}
+          </button>
+        </div>
+      )}
+
       {/* Main Area */}
       <main style={{ flex: 1, position: "relative", overflow: "hidden" }}>
         {activeTab === "editor" ? (
-          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", height: "100%" }}>
-            <Editor value={code} onChange={setCode} onRun={handleRun} />
-            <Output
-              logs={logs}
-              error={error}
-              isRunning={isRunning}
-              waitingForInput={waitingForInput}
-              inputPrompt={inputPrompt}
-              onSubmitInput={handleSubmitInput}
-              onClear={() => {
-                setLogs([]);
-                setError(null);
-              }}
-            />
-          </div>
+          isMobile ? (
+            /* Mobile View: Show either Code or Output full-screen */
+            <div style={{ height: "100%", width: "100%" }}>
+              <div style={{ display: mobilePanel === "code" ? "block" : "none", height: "100%" }}>
+                <Editor value={code} onChange={setCode} onRun={handleRun} />
+              </div>
+              <div style={{ display: mobilePanel === "output" ? "block" : "none", height: "100%" }}>
+                <Output
+                  logs={logs}
+                  error={error}
+                  isRunning={isRunning}
+                  waitingForInput={waitingForInput}
+                  inputPrompt={inputPrompt}
+                  onSubmitInput={handleSubmitInput}
+                  onClear={() => {
+                    setLogs([]);
+                    setError(null);
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            /* Desktop View: Side-by-side */
+            <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", height: "100%" }}>
+              <Editor value={code} onChange={setCode} onRun={handleRun} />
+              <Output
+                logs={logs}
+                error={error}
+                isRunning={isRunning}
+                waitingForInput={waitingForInput}
+                inputPrompt={inputPrompt}
+                onSubmitInput={handleSubmitInput}
+                onClear={() => {
+                  setLogs([]);
+                  setError(null);
+                }}
+              />
+            </div>
+          )
         ) : (
+          /* Guide Tab */
           <div style={{ height: "100%", overflowY: "auto", background: "#181818" }}>
             <Guide onLoadSnippet={handleLoadSnippet} />
           </div>

@@ -132,7 +132,7 @@ emit(factorial(5));
   ];
 
   return (
-    <div style={{ maxWidth: 760, margin: "0 auto", padding: "24px 16px", color: "#cccccc" }}>
+    <div style={{ maxWidth: 760, margin: "0 auto", padding: "16px 12px", color: "#cccccc" }}>
       <h1 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "8px", color: "#ffffff" }}>
         Bolt Language Guide
       </h1>
@@ -142,21 +142,23 @@ emit(factorial(5));
         <code style={{ background: "#222", padding: "2px 4px", color: "#e0e0e0" }}>give</code>.
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         {sections.map((sec, idx) => (
           <div
             key={idx}
             style={{
               background: "#1e1e1e",
               border: "1px solid #2d2d2d",
-              padding: "12px 14px"
+              padding: "12px 12px"
             }}
           >
             <div
               style={{
                 display: "flex",
+                flexWrap: "wrap",
+                gap: "8px",
                 justifyContent: "space-between",
-                alignItems: "baseline",
+                alignItems: "center",
                 marginBottom: "6px"
               }}
             >
@@ -169,15 +171,16 @@ emit(factorial(5));
                   background: "transparent",
                   border: "1px solid #444444",
                   color: "#aaaaaa",
-                  padding: "2px 8px",
+                  padding: "4px 10px",
                   fontSize: "11px",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  minHeight: "28px"
                 }}
               >
                 load into editor
               </button>
             </div>
-            <p style={{ fontSize: "12px", color: "#888888", marginBottom: "8px" }}>
+            <p style={{ fontSize: "12px", color: "#888888", marginBottom: "8px", lineHeight: "1.4" }}>
               {sec.note}
             </p>
             <pre

@@ -38,7 +38,7 @@ export const Editor: React.FC<EditorProps> = ({ value, onChange, onRun }) => {
           "false",
           "none"
         ],
-        builtins: ["len", "push", "pop", "emit"],
+        builtins: ["len", "push", "pop", "emit", "input", "int", "float", "string"],
         operators: [
           "=",
           "+=",
@@ -106,7 +106,17 @@ export const Editor: React.FC<EditorProps> = ({ value, onChange, onRun }) => {
           scrollBeyondLastLine: false,
           tabSize: 4,
           automaticLayout: true,
-          renderLineHighlight: "line"
+          renderLineHighlight: "line",
+          wordWrap: "on",
+          lineNumbersMinChars: 3,
+          glyphMargin: false,
+          folding: false,
+          lineDecorationsWidth: 4,
+          quickSuggestions: false,
+          scrollbar: {
+            verticalScrollbarSize: 5,
+            horizontalScrollbarSize: 5
+          }
         }}
       />
     </div>

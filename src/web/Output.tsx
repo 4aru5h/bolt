@@ -51,9 +51,10 @@ export const Output: React.FC<OutputProps> = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "6px 12px",
+          padding: "8px 12px",
           background: "#1e1e1e",
-          borderBottom: "1px solid #2d2d2d"
+          borderBottom: "1px solid #2d2d2d",
+          minHeight: "36px"
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -76,8 +77,8 @@ export const Output: React.FC<OutputProps> = ({
             background: "transparent",
             border: "1px solid #333333",
             color: "#aaaaaa",
-            padding: "2px 8px",
-            fontSize: "11px",
+            padding: "4px 10px",
+            fontSize: "12px",
             cursor: "pointer"
           }}
         >
@@ -92,12 +93,13 @@ export const Output: React.FC<OutputProps> = ({
           overflowY: "auto",
           color: "#d4d4d4",
           whiteSpace: "pre-wrap",
-          lineHeight: 1.5
+          lineHeight: 1.5,
+          WebkitOverflowScrolling: "touch"
         }}
       >
         {logs.length === 0 && !error && !isRunning && (
           <div style={{ color: "#555555" }}>
-            Ready. Press Run (or Ctrl+Enter) to execute.
+            Ready. Press Run to execute.
           </div>
         )}
 
@@ -112,10 +114,10 @@ export const Output: React.FC<OutputProps> = ({
               display: "flex",
               alignItems: "center",
               gap: 8,
-              marginTop: 4
+              marginTop: 6
             }}
           >
-            <span style={{ color: "#4ec9b0" }}>{inputPrompt || ">"}</span>
+            <span style={{ color: "#4ec9b0", fontWeight: "bold" }}>{inputPrompt || ">"}</span>
             <input
               ref={inputRef}
               type="text"
@@ -124,11 +126,11 @@ export const Output: React.FC<OutputProps> = ({
               placeholder="type input and press enter..."
               style={{
                 background: "#1c1c1c",
-                border: "1px solid #333333",
+                border: "1px solid #444444",
                 color: "#ffffff",
-                padding: "3px 8px",
+                padding: "6px 8px",
                 fontFamily: "inherit",
-                fontSize: "13px",
+                fontSize: "16px", // 16px prevents iOS Safari auto-zoom!
                 flex: 1,
                 outline: "none"
               }}
@@ -140,7 +142,7 @@ export const Output: React.FC<OutputProps> = ({
           <div
             style={{
               marginTop: logs.length > 0 ? 8 : 0,
-              padding: "6px 8px",
+              padding: "8px 10px",
               borderLeft: "2px solid #f44747",
               background: "#221515",
               color: "#f48771"
